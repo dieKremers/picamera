@@ -1,0 +1,37 @@
+The python script camMonitor.py runs in an endless loop and checks if new files in folder /home/pi/cam appeared.
+Everytime new files appear the script checks first if outdated files are in the directory and deltes these files first.
+Afterwards rsyc synchronized the remaining files with the NAS (mounted to /home/pi/NAS/picamera/) 
+(NAS-Path: KREMERSNAS\public\picamera)
+Attention: rsync also deletes the outdated files on the NAS. This can be disabled in the script.
+
+Logfile of the python Script is written to /home/pi/camera-project/*.log
+
+
+The picture-capturing is done by the motion deamon:
+Die links unten enthalten das tutorial. Den ganzen Web-Server-Kram hab ich nicht gemacht. Die Dateien werden ja auf das NAS kopiert.
+(https://praxistipps.chip.de/raspberry-pi-ueberwachungskamera-und-webserver-bauen-so-gehts_104442
+https://tutorials-raspberrypi.de/raspberry-pi-ueberwachungskamera-livestream-einrichten/)
+motion installiern:	sudo apt-get install motion -y
+camera installiern:	sudo modprobe bcm2835-v4l2  (nach der 4 kommt ein L wie Ludwig)
+Livestream konfig:	v4l2-ctl -V
+
+Hier der wesentliche Inhalt von der Webseite:
+1. Starten Sie anschließend die "Raspberry Pi Configuration" und aktivieren Sie beim Tab "Interfaces" die Kamera.
+2. Installieren Sie mit den Befehlen sudo modprobe v4l2_common und sudo modprobe bcm2835-v4l2 zwei kleine Video4Linux-Module.
+3. Fügen Sie diese anschließend mit den Befehlen echo "v4l2_common" | sudo tee -a /etc/modules und echo "bcm2835-v4l2" | sudo tee -a /etc/modules der Datei /etc/modules hinzu.
+4. Wenn Sie sich nun mit dem Befehl ls /dev/video* die Videogeräte anzeigen lassen, sollte auch die Kamera erscheinen.
+5. Installieren Sie im nächsten Schritt mit dem Befehl sudo apt-get install motion ein Tool namens "Motion" und bearbeiten Sie mit sudo nano /etc/default/motion die Konfigurationsdatei. Tragen Sie in dieser "start_motion_daemon=" den Befehl yes ein und speichern Sie die Datei.
+6. Erstellen Sie außerdem mit dem Befehl mkdir /home/pi/cam ein neues Verzeichnis und geben Sie diesem mit den Befehlen sudo chgrp motion /home/pi/cam und chmod g+rwx /home/pi/cam die nötigen Rechte.
+7. Nun müssen Sie mit sudo nano /etc/motion/motion.conf die Konfigurationsdatei von Motion bearbeiten. Setzen Sie hier den "daemon" auf on, wählen Sie als "target_dir" /home/pi/cam und setzen Sie den "stream_localhost" auf off. Tipp: Nach bestimmten Einstellungen können Sie mit [STRG] + [W] suchen.
+8. Dann wählen Sie als "width" 640, als "height" 480 und als "framerate" 10, damit die Bilder bei langsamem Internet nicht verzögert sind.
+9. Nun wählen Sie als "threshold" den Wert 5000, setzen Sie "ffmpeg_output_movies" und "output_pictures" auf off, legen als "stream_port" 8081, als "stream_quality" 75 und als "stream_maxrate" 10 fest. Setzen Sie schließlich die "stream_motion" auf on.
+10. Starten Sie schließlich mit dem Befehl sudo service motion start die Überwachungskamera. Um auf den Stream zuzugreifen, tragen Sie die notierte IP, sowie das Suffix ":8081" dahinter (als Port) in den Browser ei
+
+In Kürze:
+Konfiguration der Motion-Detection:
+sudo nano /etc/motion/motion.conf
+	target_dir
+	width
+	height
+	framerate
+	threshold (5000 empfohlen)
